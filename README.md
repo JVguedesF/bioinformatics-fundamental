@@ -1,4 +1,4 @@
-# Bioinformatics Fundamentals 🧬
+# Bioinformatics Fundamental 🧬
 
 ![Status](https://img.shields.io/badge/Status-Active_Development-green)
 ![Level](https://img.shields.io/badge/Level-Fundamentals-blue)
