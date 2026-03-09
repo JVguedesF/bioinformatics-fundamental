@@ -1,0 +1,24 @@
+# Runtime & logs
+pipeline.log
+*.log
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+
+# Dev environment
+.venv/
+.env
+.env.*
+
+# Generated outputs (not source-controlled)
+results/
+
+# IDE
+.vscode/
+.idea/

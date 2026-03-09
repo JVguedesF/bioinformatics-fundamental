@@ -1,0 +1,29 @@
+# Runtime & logs
+pipeline.log
+*.log
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+
+# Dev environment
+.venv/
+.env
+.env.*
+
+# Data & results (mount as volumes at runtime instead)
+data/
+results/
+
+# Version control
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/

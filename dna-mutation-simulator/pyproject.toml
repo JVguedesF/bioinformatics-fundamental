@@ -1,0 +1,14 @@
+[project]
+name = "replication-mutation-sim"
+version = "1.0.0"
+description = "DNA replication, mutation and repair simulation pipeline"
+requires-python = ">=3.10"
+
+dependencies = [
+    "biopython",
+    "rich",
+    "python-dotenv",
+    "matplotlib",
+    "numpy",
+    "pandas",
+]

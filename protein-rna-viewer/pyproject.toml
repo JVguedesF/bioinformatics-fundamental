@@ -1,0 +1,11 @@
+[project]
+name = "bio-pipeline"
+version = "0.1.0"
+dependencies = [
+    "biopython",
+    "rich",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+rna = ["ViennaRNA"]

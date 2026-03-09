@@ -1,0 +1,11 @@
+[project]
+name = "genecode-pro"
+version = "1.0.0"
+description = "Codon usage and ORF analysis pipeline"
+requires-python = ">=3.10"
+
+dependencies = [
+    "biopython",
+    "rich",
+    "python-dotenv",
+]

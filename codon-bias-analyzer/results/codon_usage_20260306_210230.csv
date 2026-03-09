@@ -1,0 +1,4 @@
+id,file,table,length,orf_count,gc_percent,top_codons
+NC_001416.1,lambda_phage.fasta,1,48502,122,49.85773782524432,"[('CAG', 399), ('AAA', 395), ('CTG', 382), ('TTT', 369), ('TGC', 355)]"
+NC_000913.3,e_coli_k12.fasta,1,4641652,10191,50.79070985933456,"[('CGC', 38319), ('GCG', 38202), ('TTT', 36842), ('AAA', 36172), ('CAG', 34724)]"
+NM_000207.3,human_insulin.fasta,1,465,3,63.87096774193548,"[('TGG', 12), ('AGC', 8), ('ACC', 8), ('CAG', 7), ('GCA', 7)]"

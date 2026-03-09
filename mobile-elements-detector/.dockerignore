@@ -1,0 +1,12 @@
+# Ambientes virtuais e configuração
+venv/
+.env
+.git/
+.vscode/
+
+
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
