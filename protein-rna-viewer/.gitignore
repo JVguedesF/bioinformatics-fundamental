@@ -16,9 +16,6 @@ build/
 .env
 .env.*
 
-# Generated outputs (not source-controlled)
-results/
-
 # IDE
 .vscode/
 .idea/
