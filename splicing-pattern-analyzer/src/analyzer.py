@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING
 from Bio.Seq import Seq
 from Bio.SeqUtils import gc_fraction
 
-from .models import Intron
-from .exceptions import EmptySequenceError, SequenceAnalysisError
+from src.models import Intron, EmptySequenceError, SequenceAnalysisError
 
 if TYPE_CHECKING:
     from Bio.Seq import Seq as SeqType
@@ -23,16 +22,6 @@ class SplicingAnalyzer:
     ACCEPTOR_SITE_LEN: int = 2
 
     def analyze(self, mrna_seq: str | Seq, genomic_seq: str | Seq) -> list[Intron]:
-        """
-        Analyzes mRNA and genomic sequences to identify introns.
-
-        Args:
-            mrna_seq: The mRNA sequence.
-            genomic_seq: The genomic DNA sequence.
-
-        Returns:
-            A list of identified Intron objects.
-        """
         mrna = str(mrna_seq).upper()
         genomic = str(genomic_seq).upper()
 
@@ -50,7 +39,6 @@ class SplicingAnalyzer:
         genomic_len = len(genomic)
 
         while rna_idx < len(mrna):
-            # Safety check to prevent IndexError if genomic ends before mRNA
             if gen_idx >= genomic_len:
                 break
 

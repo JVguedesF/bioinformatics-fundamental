@@ -1,5 +1,14 @@
 from dataclasses import dataclass
 
+class BioPipelineError(Exception):
+    pass
+
+class SequenceAnalysisError(BioPipelineError):
+    pass
+
+class EmptySequenceError(SequenceAnalysisError):
+    pass
+
 
 @dataclass
 class Intron:

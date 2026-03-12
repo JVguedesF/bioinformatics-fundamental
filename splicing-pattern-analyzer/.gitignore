@@ -21,11 +21,9 @@ ENV/
 .env.*
 !.env.example
 
-# Data — sequences can be large and are re-downloadable via Entrez
-data/sequences/
-
 # Results — generated at runtime, not versioned
 results/
+data/
 
 # Logs
 *.log
@@ -46,3 +44,5 @@ pipeline.log
 .coverage
 htmlcov/
 .pytest_cache/
+
+src/eukaryotic_splicing_analyzer.egg-info

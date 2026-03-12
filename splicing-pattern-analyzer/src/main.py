@@ -1,38 +1,22 @@
-import logging
 import sys
 import argparse
 from pathlib import Path
 
 from Bio import SeqIO
-from rich.console import Console
-from rich.logging import RichHandler
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from .config import settings
-from .analyzer import SplicingAnalyzer
-from .downloader import download_datasets
-from .reporter import SplicingReporter
-from .view import SplicingView
-from .exceptions import BioPipelineError
-
-logging.basicConfig(
-    level="INFO",
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[
-        RichHandler(show_path=False),
-        logging.FileHandler("pipeline.log"),
-    ],
-)
-
-console = Console()
+from src.config import settings
+from src.analyzer import SplicingAnalyzer
+from src.downloader import download_datasets
+from src.reporter import SplicingReporter
+from src.models import BioPipelineError
 
 
 def _parse_arguments():
-    parser = argparse.ArgumentParser(description="GeneCodePro Splicing Analyzer")
+    parser = argparse.ArgumentParser(description="Eukaryotic Splicing Analyzer")
     parser.add_argument("--input", "-i", type=Path)
     parser.add_argument("--output", "-o", type=Path)
     return parser.parse_args()
@@ -45,6 +29,36 @@ def _get_dataset_path(name_pattern: str) -> Path:
     raise FileNotFoundError(f"Dataset containing '{name_pattern}' not found.")
 
 
+def print_visualization(label, introns, genomic_name, mrna_name):
+    print("\n" + "=" * 60)
+    print(f"▶ ANALISANDO: {label}")
+    print("=" * 60)
+    print(f"  Referência Genômica: {genomic_name}")
+    print(f"  Alvo mRNA: {mrna_name}")
+    print(f"  Íntrons Detectados: {len(introns)}")
+
+    if not introns:
+        print("\n  [ Aviso: Nenhum íntron mapeado nesta sequência ]")
+        return
+
+    print("\n  [ Mapa de Íntrons (Top 5) ]")
+
+    canonical_count = sum(1 for i in introns if i.is_canonical)
+
+    print(f"    - Cânonicos (GT-AG): {canonical_count}/{len(introns)}")
+    print(f"    - Média de GC: {sum(i.gc_content for i in introns) / len(introns):.2f}%\n")
+
+    print(f"    {'ID':<5} | {'INÍCIO':<10} | {'FIM':<10} | {'TAMANHO':<8} | SÍTIOS (5'...3')")
+    print("    " + "-" * 55)
+
+    for i in introns[:5]:
+        sites = f"{i.donor_site}...{i.acceptor_site}"
+        print(f"    {i.id:<5} | {i.start:<10} | {i.end:<10} | {i.length:<8} | {sites}")
+
+    if len(introns) > 5:
+        print(f"    ... e mais {len(introns) - 5} íntrons.")
+
+
 def main():
     args = _parse_arguments()
 
@@ -53,14 +67,15 @@ def main():
     if args.output:
         settings.RESULTS_DIR = args.output
 
-    console.rule("[bold magenta]GeneCode v1.0[/bold magenta]")
+    print("=" * 60)
+    print("Eukaryotic Splicing Analyzer v1.0")
+    print("=" * 60)
 
-    with console.status("[bold green]Verificando arquivos...[/]"):
-        download_datasets(settings.DATA_DIR)
+    print("Verificando arquivos...")
+    download_datasets(settings.DATA_DIR)
 
     try:
         genomic_path = _get_dataset_path("genomic_ref")
-        console.print(f"[dim]Carregando referência: {genomic_path.name}[/dim]")
         genomic_record = SeqIO.read(genomic_path, "fasta")
 
         analysis_map = [
@@ -70,32 +85,28 @@ def main():
 
         analyzer = SplicingAnalyzer()
         reporter = SplicingReporter(settings.RESULTS_DIR)
-        view = SplicingView()
 
         for mrna_pattern, label in analysis_map:
             mrna_path = _get_dataset_path(mrna_pattern)
-
-            console.rule(f"[bold cyan]Analysing: {label}[/]")
-            console.print(f"[dim]Genomic: {genomic_path.name} | mRNA: {mrna_path.name}[/dim]")
-
             mrna_record = SeqIO.read(mrna_path, "fasta")
 
-            with console.status(f"[bold yellow]Mapping introns...[/]"):
-                introns = analyzer.analyze(mrna_record.seq, genomic_record.seq)
+            introns = analyzer.analyze(mrna_record.seq, genomic_record.seq)
 
-            view.display_results(label, introns)
+            print_visualization(label, introns, genomic_path.name, mrna_path.name)
 
-            output_path = reporter.generate_reports(label, introns)
-            console.print(f"   [green]✔[/] Reports saved to: [underline]{output_path}[/]")
+            print("\n  [ Exportação de Dados ]")
+            reporter.generate_reports(label, introns)
 
     except BioPipelineError as e:
-        console.print(f"[red]Pipeline error:[/red] {e}")
-        raise
+        print(f"\n[ERRO DE PIPELINE] {e}")
+        sys.exit(1)
     except Exception as e:
-        console.print(f"[red]Unexpected error:[/red] {e}")
-        raise
+        print(f"\n[ERRO INESPERADO] {e}")
+        sys.exit(1)
 
-    console.rule("[bold green]Pipeline Finalizado![/bold green]")
+    print("\n" + "=" * 60)
+    print("Pipeline Finalizado!")
+    print("=" * 60)
 
 
 if __name__ == "__main__":

@@ -1,19 +1,20 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.10-slim-bookworm
 
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .
+COPY src ./src
 
-RUN pip install --no-cache-dir biopython rich python-dotenv
+RUN pip install --no-cache-dir . && \
+    mkdir -p /app/data /app/results
 
-COPY src/ ./src/
+ENV PYTHONPATH=/app
 
-RUN pip install --no-cache-dir --no-deps .
-
-ENV ENTREZ_EMAIL="seu_email@exemplo.com"
-
-CMD ["eukaryotic-splicing-analyzer"]
+CMD ["python", "src/main.py"]
