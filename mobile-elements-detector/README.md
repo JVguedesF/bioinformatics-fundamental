@@ -19,7 +19,7 @@ Ferramenta de linha de comando para análise comparativa de **arquitetura genôm
 ---
 
 ## 📂 Estrutura
-
+```
 .
 ├── src/
 │   ├── analyzer.py      # Densidade gênica, GC Skew e scan de elementos móveis
@@ -37,7 +37,7 @@ Ferramenta de linha de comando para análise comparativa de **arquitetura genôm
 ├── Dockerfile
 ├── pyproject.toml
 └── .env                 # Credenciais do Entrez (não versionado)
-
+``
 ---
 
 ## ⚙️ Configuração
