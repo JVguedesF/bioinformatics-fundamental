@@ -1,0 +1,32 @@
+# Runtime & logs
+pipeline.log
+*.log
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+
+# Dev environment
+venv/
+.venv/
+.env
+.env.*
+
+# Data & results (montar como volumes em runtime)
+data/
+results/
+
+# Version control
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+src/replication_mutation_sim.egg-info
