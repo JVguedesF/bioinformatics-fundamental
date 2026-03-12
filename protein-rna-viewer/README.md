@@ -1,8 +1,3 @@
-Aqui está o `README.md` para o **protein-rna-viewer**, seguindo rigorosamente o mesmo padrão visual, técnico e estrutural que estabelecemos, e respeitando a sua regra de não incluir nenhum comentário dentro dos blocos de código.
-
-Como este projeto envolve ferramentas pesadas de bioinformática estrutural (PyMOL e ViennaRNA), o Docker se torna ainda mais protagonista aqui.
-
-```markdown
 # Protein-RNA Viewer 🧬
 
 ![Status](https://img.shields.io/badge/Status-Active_Development-green)
@@ -115,7 +110,3 @@ Exemplos de alvos processados por padrão pela ferramenta:
 | `1LYZ` | Estrutura PDB | Lisozima (modelo de visualização proteica) |
 | `ecoli_tRNA_S88` | Sequência FASTA | Predição de dobramento (folding) de RNA |
 | `NM_000207` | Sequência FASTA | Transcrito alvo para análise de mutações |
-
-```
-
-```
