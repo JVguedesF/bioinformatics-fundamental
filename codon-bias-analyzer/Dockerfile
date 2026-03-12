@@ -10,9 +10,11 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .
-COPY utils ./utils
 COPY src ./src
 
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir . && \
+    mkdir -p /app/data /app/results/graphs
+
+ENV PYTHONPATH=/app
 
 CMD ["python", "src/main.py"]

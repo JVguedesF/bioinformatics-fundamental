@@ -1,9 +1,0 @@
-analyzer
-config
-downloader
-main
-models
-pipeline
-reporter
-view
-visualizer

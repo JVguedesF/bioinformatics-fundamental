@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: genecode-pro
-Version: 1.0.0
-Summary: Codon usage and ORF analysis pipeline
-Requires-Python: >=3.10
-Requires-Dist: biopython
-Requires-Dist: rich
-Requires-Dist: python-dotenv
