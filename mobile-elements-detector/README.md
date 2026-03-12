@@ -37,7 +37,7 @@ Ferramenta de linha de comando para análise comparativa de **arquitetura genôm
 ├── Dockerfile
 ├── pyproject.toml
 └── .env                 # Credenciais do Entrez (não versionado)
-``
+```
 ---
 
 ## ⚙️ Configuração
