@@ -1,6 +1,14 @@
 from dataclasses import dataclass
 from typing import List
 
+class BioPipelineError(Exception):
+    pass
+
+class EmptySequenceError(BioPipelineError):
+    pass
+
+class SequenceAnalysisError(BioPipelineError):
+    pass
 
 @dataclass
 class GeneDensityResult:
@@ -9,7 +17,6 @@ class GeneDensityResult:
     total_length_bp: int
     gene_count: int
     density_genes_per_kb: float
-
 
 @dataclass
 class GCSkewResult:
@@ -22,13 +29,11 @@ class GCSkewResult:
     cumulative_skew: List[float]
     predicted_ori_pos: int
 
-
 @dataclass
 class MobileElementHit:
     start: int
     end: int
     sequence_snippet: str
-
 
 @dataclass
 class MobileElementAnalysis:

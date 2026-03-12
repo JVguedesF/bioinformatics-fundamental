@@ -10,3 +10,5 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+
+src/mobile_elements_detector.egg-info

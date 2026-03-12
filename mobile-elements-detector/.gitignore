@@ -16,3 +16,9 @@ env/
 *.log
 .DS_Store
 .env
+
+# Data & results (montar como volumes em runtime)
+data/
+results/
+
+src/mobile_elements_detector.egg-info

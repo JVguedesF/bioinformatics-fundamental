@@ -1,38 +1,24 @@
 import sys
 from pathlib import Path
 from typing import List, Dict
-
 from Bio import Entrez
-from rich.console import Console
-from rich.progress import track
-
-from .config import settings
-
-console = Console()
-
+from src.config import settings
 
 def download_datasets(datasets: List[Dict], output_dir: Path) -> None:
     if not settings.ENTREZ_EMAIL:
-        console.print("[red]Erro: Email do Entrez não fornecido![/]")
-        console.print("[yellow]Verifique seu arquivo .env e as configurações.[/]")
+        print("  [Erro] Email do Entrez não fornecido!")
         sys.exit(1)
-
     Entrez.email = settings.ENTREZ_EMAIL
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    for data in track(datasets, description="[green]Baixando arquivos...[/]"):
+    for data in datasets:
         ext = "fasta" if data.get("group") == "nuclear_target" else "gb"
         file_path = output_dir / f"{data['id']}.{ext}"
-
-        if file_path.exists():
-            console.print(f"[cyan]Já existe: {file_path.name} (pulando)[/]")
-            continue
-
+        if file_path.exists(): continue
+        print(f"  - Baixando {data['id']}...")
         r_type = "gbwithparts" if data.get("type") == "genbank" else "fasta"
-
         try:
             with Entrez.efetch(db="nucleotide", id=data["id"], rettype=r_type, retmode="text") as handle:
                 file_path.write_text(handle.read())
-            console.print(f"[green]✓ {file_path.name}[/]")
+            print(f"    ✓ {file_path.name}")
         except Exception as e:
-            console.print(f"[bold red]Falha ao baixar {data['id']}: {e}[/]")
+            print(f"    [Falha] {data['id']}: {e}")

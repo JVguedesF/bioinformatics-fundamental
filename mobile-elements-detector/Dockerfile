@@ -1,19 +1,18 @@
-FROM python:3.11-slim
+FROM python:3.10-slim-bookworm
 
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    gcc g++ make && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml README.md ./
+COPY pyproject.toml .
+COPY src ./src
 
-RUN pip install --no-cache-dir biopython rich python-dotenv matplotlib
+RUN pip install --no-cache-dir . && \
+    mkdir -p /app/data /app/results/graphs
 
-COPY src/ ./src/
+ENV PYTHONPATH=/app
 
-RUN pip install --no-cache-dir --no-deps .
-
-ENV ENTREZ_EMAIL=""
-
-CMD ["mobile-elements-detector"]
+CMD ["python", "src/main.py"]

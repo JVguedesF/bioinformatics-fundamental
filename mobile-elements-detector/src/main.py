@@ -2,129 +2,73 @@ import sys
 import argparse
 from pathlib import Path
 
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-
-ROOT_DIR = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from .config import settings
-from .reporter import BioReporter
-from . import downloader, analyzer, view
+from src.config import settings
+from src.reporter import BioReporter
+from src.printer import TerminalPrinter
+from src import downloader, analyzer, view
 
-console = Console()
-
-
-def _has_missing_files(datasets, data_dir: Path) -> bool:
-    if not data_dir.exists():
-        return True
-
+def _check_missing(datasets, data_dir):
+    missing = False
     for data in datasets:
         ext = "fasta" if data.get("group") == "nuclear_target" else "gb"
         if not (data_dir / f"{data['id']}.{ext}").exists():
-            console.print(f"[yellow]Arquivo ausente: {data['id']}.{ext}[/yellow]")
-            return True
+            print(f"  [Aviso] Arquivo ausente: {data['id']}.{ext}")
+            missing = True
+    return missing
 
-    return False
+def _run_density_analysis(graphs_dir):
+    TerminalPrinter.section("1. Análise de Densidade Gênica")
+    density_data = analyzer.pipeline_density_analysis(settings.DATASETS, settings.DATA_DIR)
+    if density_data:
+        TerminalPrinter.density_table(density_data)
+        BioReporter.export_density(density_data, settings.RESULTS_DIR)
+        if input("\nGerar gráfico de densidade? (s/n): ").lower() == "s":
+            view.plot_density_comparison(density_data, graphs_dir)
 
+def _run_skew_analysis(graphs_dir):
+    TerminalPrinter.section("2. Análise de GC Skew")
+    skew_data = analyzer.pipeline_skew_analysis(settings.DATASETS, settings.DATA_DIR, settings.GC_SKEW_WINDOW, settings.GC_SKEW_STEP)
+    if skew_data:
+        for res in skew_data:
+            TerminalPrinter.skew_result(res.genome_name, res.predicted_ori_pos)
+        BioReporter.export_skew(skew_data, settings.RESULTS_DIR)
+        if input("\nGerar gráficos de GC Skew? (s/n): ").lower() == "s":
+            for res in skew_data:
+                view.plot_gc_skew_curve(res, graphs_dir)
+
+def _run_mobile_analysis(graphs_dir):
+    TerminalPrinter.section("3. Rastreamento de Elementos Móveis")
+    mobile_data = analyzer.pipeline_mobile_elements(settings.DATASETS, settings.DATA_DIR, settings.ALU_CONSENSUS_SEQ)
+    if mobile_data:
+        TerminalPrinter.mobile_summary(mobile_data.genome_name, mobile_data.total_matches)
+        BioReporter.export_mobile_elements(mobile_data, settings.RESULTS_DIR)
+        if input("\nGerar mapa cromossômico? (s/n): ").lower() == "s":
+            view.plot_chromosome_map(mobile_data, graphs_dir)
 
 def main():
     parser = argparse.ArgumentParser(description="Genomic Architecture Analyzer")
-    parser.add_argument("--download", action="store_true", help="Force download of datasets")
+    parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
 
-    console.print(Panel.fit(
-        "[bold cyan]Projeto 4: Endossimbiose & Elementos Móveis[/bold cyan]",
-        subtitle="Bioinformatics Pipeline",
-    ))
+    graphs_dir = settings.RESULTS_DIR / "graphs"
+    graphs_dir.mkdir(parents=True, exist_ok=True)
 
-    if args.download or _has_missing_files(settings.DATASETS, settings.DATA_DIR):
-        console.print("[bold yellow]Iniciando download dos datasets...[/bold yellow]")
+    TerminalPrinter.header()
+
+    if args.download or _check_missing(settings.DATASETS, settings.DATA_DIR):
         downloader.download_datasets(settings.DATASETS, settings.DATA_DIR)
-        console.print("[bold green]✓ Downloads concluídos![/bold green]")
     else:
-        console.print("[bold green]✓ Todos os arquivos verificados localmente.[/bold green]")
+        print("  ✓ Todos os arquivos verificados localmente.")
 
-    console.print("\n[bold yellow]--- 1. Análise de Densidade Gênica ---[/bold yellow]")
+    _run_density_analysis(graphs_dir)
+    _run_skew_analysis(graphs_dir)
+    _run_mobile_analysis(graphs_dir)
 
-    with console.status("[bold white]Processando arquivos..."):
-        density_data = analyzer.pipeline_density_analysis(settings.DATASETS, settings.DATA_DIR)
-
-    if not density_data:
-        console.print("[bold red]Nenhum dado processado. Verifique os arquivos .gb em data/.[/bold red]")
-    else:
-        table = Table(title="Comparação de Densidade")
-        table.add_column("Genoma", style="cyan")
-        table.add_column("Grupo", style="magenta")
-        table.add_column("Genes/kb", justify="right", style="green")
-
-        for res in density_data:
-            table.add_row(res.genome_name, res.group, f"{res.density_genes_per_kb:.2f}")
-
-        console.print(table)
-        console.print("[bold white]Exportando resultados...[/bold white]")
-        BioReporter.export_density(density_data, settings.RESULTS_DIR)
-
-        if console.input("\n[dim]Gerar gráfico de densidade? (s/n): [/dim]").lower() == "s":
-            path = view.plot_density_comparison(density_data, settings.RESULTS_DIR)
-            console.print(f"[dim]  ↳ gráfico  → {path.name}[/dim]")
-
-    console.print("\n[bold yellow]--- 2. Análise de GC Skew (Replicação) ---[/bold yellow]")
-
-    with console.status("[bold white]Calculando Skew..."):
-        skew_data = analyzer.pipeline_skew_analysis(
-            settings.DATASETS,
-            settings.DATA_DIR,
-            settings.GC_SKEW_WINDOW,
-            settings.GC_SKEW_STEP,
-        )
-
-    if not skew_data:
-        console.print("[bold red]Nenhum dado circular encontrado para análise de Skew.[/bold red]")
-    else:
-        for res in skew_data:
-            console.print(
-                f" > [cyan]{res.genome_name}[/cyan]: "
-                f"Origem prevista na base [bold red]{res.predicted_ori_pos}[/bold red]"
-            )
-        console.print("[bold white]Exportando resultados...[/bold white]")
-        BioReporter.export_skew(skew_data, settings.RESULTS_DIR)
-
-        if console.input("\n[dim]Gerar gráficos de GC Skew? (s/n): [/dim]").lower() == "s":
-            for res in skew_data:
-                path = view.plot_gc_skew_curve(res, settings.RESULTS_DIR)
-                console.print(f"[dim]  ↳ gráfico  → {path.name}[/dim]")
-
-    console.print("\n[bold yellow]--- 3. Rastreamento de Elementos Móveis (Alu) ---[/bold yellow]")
-
-    with console.status("[bold white]Escaneando Genoma Nuclear..."):
-        mobile_data = analyzer.pipeline_mobile_elements(
-            settings.DATASETS,
-            settings.DATA_DIR,
-            settings.ALU_CONSENSUS_SEQ,
-        )
-
-    if mobile_data:
-        console.print(Panel(
-            f"Alvo: [bold]{mobile_data.genome_name}[/bold]\n"
-            f"Elemento Buscado: Alu Consensus\n"
-            f"Ocorrências Encontradas: [bold red]{mobile_data.total_matches}[/bold red]",
-            title="Resultado do Scan",
-            border_style="green",
-        ))
-        console.print("[bold white]Exportando resultados...[/bold white]")
-        BioReporter.export_mobile_elements(mobile_data, settings.RESULTS_DIR)
-
-        if console.input("\n[dim]Gerar mapa cromossômico? (s/n): [/dim]").lower() == "s":
-            path = view.plot_chromosome_map(mobile_data, settings.RESULTS_DIR)
-            console.print(f"[dim]  ↳ gráfico  → {path.name}[/dim]")
-    else:
-        console.print("[red]Aviso: Dataset nuclear não encontrado ou erro na leitura.[/red]")
-
-    console.print("\n[bold green]Pipeline Finalizado![/bold green]")
-
+    print("\nPipeline Finalizado!")
 
 if __name__ == "__main__":
     main()
