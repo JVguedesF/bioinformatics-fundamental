@@ -1,4 +1,5 @@
 import sys
+import os
 import matplotlib.pyplot as plt
 from pathlib import Path
 
@@ -67,6 +68,10 @@ def main():
     results_dir.mkdir(parents=True, exist_ok=True)
     graphs_dir.mkdir(parents=True, exist_ok=True)
     data_path.mkdir(parents=True, exist_ok=True)
+
+    if not os.access(results_dir, os.W_OK):
+        print(f"\n[ERRO] Sem permissão de escrita em: {results_dir}")
+        return
 
     TerminalPrinter.header("DNA Mutation Simulator", "v1.0")
 

@@ -8,9 +8,7 @@ from src.config import settings
 
 def download_sequences(email: str, datasets: List[Dict], output_dir: Path):
     if not email:
-        print("\n[ERRO] Email do Entrez não fornecido!")
-        print("Verifique seu arquivo .env e as configurações.\n")
-        sys.exit(1)
+        raise ValueError("Email do Entrez não configurado no arquivo .env")
 
     Entrez.email = email
     output_dir.mkdir(parents=True, exist_ok=True)
