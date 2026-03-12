@@ -1,5 +1,4 @@
 # Runtime & logs
-pipeline.log
 *.log
 
 # Python artifacts
@@ -17,8 +16,8 @@ build/
 .env.*
 
 # Data & results (mount as volumes at runtime instead)
-data/
 results/
+src/bio_pipeline.egg-info
 
 # Version control
 .git/

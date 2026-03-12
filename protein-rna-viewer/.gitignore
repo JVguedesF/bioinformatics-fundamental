@@ -19,3 +19,9 @@ build/
 # IDE
 .vscode/
 .idea/
+
+# Data & results (montar como volumes em runtime)
+results/
+
+venv
+src/bio_pipeline.egg-info

@@ -3,8 +3,8 @@ name = "bio-pipeline"
 version = "0.1.0"
 dependencies = [
     "biopython",
-    "rich",
     "python-dotenv",
+    "rich",
 ]
 
 [project.optional-dependencies]
